@@ -1,12 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using IWshRuntimeLibrary;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -27,14 +26,32 @@ namespace FlickUAC
             }
         }
 
+        public class LanguageItem
+        {
+            public required string Code { get; set; }
+            public required string NativeName { get; set; }
+        }
+
         public ObservableCollection<UacItem> DisplayItems { get; set; } = new();
         private static readonly string registryPath = @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
-        private Dictionary<string, string> languageResource = new Dictionary<string, string>();
-        private static Dictionary<string, string> languageList = new Dictionary<string, string>{
-            { "中文繁體", "TraditionalChinese" },
-            { "中文简体", "SimplifiedChinese" },
-            { "English", "English" }
-        };
+        string[] supportedLanguages = { "zh-TW", "zh-CN", "en-US" };
+        public class languageResource
+        {
+            public static languageResource Current { get; } = new languageResource();
+            public string Error => Get("error");
+            public string Message => Get("message");
+            public string NoActionTaken => Get("noActionTaken");
+            public string ReFlash => Get("ReFlash");
+            public string RegistryValueAdded => Get("registryValueAdded");
+            public string RegistryValueDeleted => Get("registryValueDeleted");
+            public string TheSelectedFilePathIs => Get("theSelectedFilePathIs");
+            public string WhetherToDeleteTheValue => Get("whetherToDeleteTheValue");
+            private string Get(string key)
+            {
+                return System.Windows.Application.Current.TryFindResource(key)?.ToString() ?? $"[{key}]";
+            }
+        }
+
         private bool ReFlashItemPath()
         {
             bool hasValue = false;
@@ -79,73 +96,118 @@ namespace FlickUAC
             }
             catch (Exception ex)
             {
-                string errorTitle = languageResource.GetValueOrDefault("error", "Error");
+                string errorTitle = languageResource.Current.Error;
                 MessageBox.Show(ex.Message, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return hasValue;
         }
-        private void ChangeLanguage(string language)
+
+        private void ChangeLanguage(string languageCode)
         {
+            string uriPath = $"/Resource/Language/{languageCode}.xaml";
+            Uri uri = new Uri(uriPath, UriKind.Relative);
             try
             {
-                language = languageList[language];
-            }
-            catch
-            {
-                switch (language)
+                ResourceDictionary newDict = new ResourceDictionary { Source = uri };
+                var mergedDicts = Application.Current.Resources.MergedDictionaries;
+                for (int i = 0; i < mergedDicts.Count; i++)
                 {
-                    case "zh-TW":
-                        language = "TraditionalChinese";
+                    if (mergedDicts[i].Source != null && mergedDicts[i].Source.OriginalString.Contains("/Language/"))
+                    {
+                        mergedDicts.RemoveAt(i);
                         break;
-                    case "zh-CN":
-                        language = "SimplifiedChinese";
-                        break;
-                    case "en-US":
-                        language = "English";
-                        break;
-                    default:
-                        language = "English";
-                        break;
+                    }
                 }
-                LanguageMenu.Text = languageList.FirstOrDefault(x => x.Value == language).Key;
+                mergedDicts.Add(newDict);
             }
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.Resource.Language.{language}.json";
-
-            using Stream? stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
+            catch (Exception ex)
             {
-                MessageBox.Show($"找不到語言資源: {language}", "錯誤", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                MessageBox.Show($"Loading language resource failed: {ex.Message}");
             }
-            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(stream);
-
-            if (data != null)
-                languageResource = data;
-            ReFlash.Content = languageResource["ReFlash"];
-            ItemDelete.Content = languageResource["ItemDelete"];
-            ItemLocation.Content = languageResource["ItemLocation"];
-            ItemAdd.Content = languageResource["ItemAdd"];
         }
+
+        private void AddItemToRegistry(string selectedFilePath)
+        {
+            MessageBoxResult result = MessageBox.Show(
+                        $"{languageResource.Current.TheSelectedFilePathIs}\n{selectedFilePath}",
+                        languageResource.Current.Message,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(registryPath))
+                    {
+                        key.SetValue(selectedFilePath, "RunAsInvoker");
+                        MessageBox.Show(
+                            languageResource.Current.RegistryValueAdded,
+                            languageResource.Current.Message,
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show(languageResource.Current.NoActionTaken, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            ReFlashItemPath();
+        }
+
         public MainWindow()
         {
             InitializeComponent();
-            LanguageMenu.Items.Clear();
-            foreach (var lang in languageList.Keys)
-                LanguageMenu.Items.Add(lang);
-            ChangeLanguage(CultureInfo.CurrentUICulture.Name);
+            var languages = supportedLanguages.Select(code =>
+            {
+                string nativeName;
+                    try
+                    {
+                        nativeName = new CultureInfo(code).NativeName;
+                    }
+                    catch
+                    {
+                        nativeName = code;
+                    }
+                return new LanguageItem { Code = code, NativeName = nativeName };
+            }).ToList();
+            LanguageMenu.ItemsSource = languages;
+            LanguageMenu.DisplayMemberPath = "NativeName";
+            LanguageMenu.SelectedValuePath = "Code";
+            string sysLang = CultureInfo.CurrentUICulture.Name;
+            if (supportedLanguages.Contains(sysLang))
+            {
+                LanguageMenu.SelectedValue = sysLang;
+            }
+            else
+            {
+                LanguageMenu.SelectedIndex = 0;
+            }
+
             ReFlashItemPath();
         }
 
         private void LanguageMenu_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (LanguageMenu.SelectedItem is string selectedLang)
-                ChangeLanguage(selectedLang);
+            if (LanguageMenu.SelectedValue is string selectedCode)
+            {
+                ChangeLanguage(selectedCode);
+            }
+        }
+
+        private void AutoSearch_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private async void ReFlash_Click(object sender, RoutedEventArgs e)
         {
-            ReFlash.Content = languageResource["ReFlash"] + (ReFlashItemPath() ? "✔️" : "❌");
+            ReFlash.Content = languageResource.Current.ReFlash + (ReFlashItemPath() ? "✔️" : "❌");
             await Task.Delay(1000);
             ChangeLanguage(LanguageMenu.Text);
         }
@@ -157,46 +219,16 @@ namespace FlickUAC
                 var openFileDialog = new Microsoft.Win32.OpenFileDialog
                 {
                     Filter = "Executables (*.exe)|*.exe|All files (*.*)|*.*",
-                    Title = "Select Application"
                 };
                 if (openFileDialog.ShowDialog() == true)
                 {
                     string selectedFilePath = openFileDialog.FileName;
-                    MessageBoxResult result = MessageBox.Show(
-                        $"{languageResource["theSelectedFilePathIs"]}\n{selectedFilePath}",
-                        languageResource["message"],
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        try
-                        {
-                            using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(registryPath))
-                            {
-                                key.SetValue(selectedFilePath, "RunAsInvoker");
-                                MessageBox.Show(
-                                    languageResource["registryValueAdded"],
-                                    languageResource["message"],
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Information);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, languageResource["error"], MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show(languageResource["noActionTaken"], languageResource["message"], MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    AddItemToRegistry(selectedFilePath);
                 }
-                ReFlashItemPath();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, languageResource["message"], MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -206,7 +238,7 @@ namespace FlickUAC
             foreach (var item in selectedItems)
             {
 
-                if (File.Exists(item.ItemPath))
+                if (System.IO.File.Exists(item.ItemPath))
                 {
                     Process.Start("explorer.exe", $"/select,\"{item.ItemPath}\"");
                 }
@@ -221,7 +253,7 @@ namespace FlickUAC
                             break;
                         }
                         directory = System.IO.Path.GetDirectoryName(directory);
-                    } while (!File.Exists(directory));
+                    } while (!System.IO.File.Exists(directory));
                 }
             }
         }
@@ -233,8 +265,8 @@ namespace FlickUAC
             if (selectedItems.Count == 0) return;
             foreach (var item in selectedItems)
             {
-                string message = $"{languageResource["whetherToDeleteTheValue"]}\n{item.ItemPath}";
-                if (MessageBox.Show(message, languageResource["message"], MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                string message = $"{languageResource.Current.WhetherToDeleteTheValue}\n{item.ItemPath}";
+                if (MessageBox.Show(message, languageResource.Current.Message, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     try
                     {
@@ -244,11 +276,11 @@ namespace FlickUAC
                             key.DeleteValue(item.ItemPath, false);
                             DisplayItems.Remove(item);
                         }
-                        MessageBox.Show(languageResource["registryValueDeleted"], languageResource["message"], MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show(languageResource.Current.RegistryValueDeleted, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, languageResource["error"], MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -259,6 +291,42 @@ namespace FlickUAC
             int selectedCount = ItemList.SelectedItems.Count;
             ItemDelete.IsEnabled = selectedCount > 0;
             ItemLocation.IsEnabled = selectedCount > 0;
+        }
+
+        private async void Window_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.None;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.All(f => System.IO.Path.GetExtension(f).Equals(".exe", StringComparison.OrdinalIgnoreCase) || System.IO.Path.GetExtension(f).Equals(".lnk", StringComparison.OrdinalIgnoreCase)))
+                    e.Effects = DragDropEffects.Copy;
+            }
+            e.Handled = true;
+        }
+
+        private async void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string file in files)
+                {
+                    if (System.IO.Path.GetExtension(file).Equals(".lnk", StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            AddItemToRegistry(((IWshShortcut)new WshShell().CreateShortcut(file)).TargetPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    else
+                        AddItemToRegistry(file);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="error">错误</sys:String>
+    <sys:String x:Key="ItemAdd">添加</sys:String>
+    <sys:String x:Key="ItemDelete">删除</sys:String>
+    <sys:String x:Key="ItemLocation">位置</sys:String>
+    <sys:String x:Key="message">信息</sys:String>
+    <sys:String x:Key="noActionTaken">未执行任何动作</sys:String>
+    <sys:String x:Key="ReFlash">刷新</sys:String>
+    <sys:String x:Key="registryValueAdded">注册表值已新增</sys:String>
+    <sys:String x:Key="registryValueDeleted">注册表值已删除</sys:String>
+    <sys:String x:Key="theSelectedFilePathIs">选择的档案路径是：</sys:String>
+    <sys:String x:Key="whetherToDeleteTheValue">是否删除该值：</sys:String>
+</ResourceDictionary>

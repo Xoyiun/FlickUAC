@@ -1,4 +1,7 @@
 ﻿<Window x:Class="FlickUAC.MainWindow"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,7 +18,8 @@
 
         <Grid Grid.Row="0" Margin="0,0,0,10">
             <ComboBox x:Name="LanguageMenu" HorizontalAlignment="Left" Width="120" VerticalAlignment="Center" SelectionChanged="LanguageMenu_SelectionChanged"/>
-            <Button x:Name="ReFlash" Content="ReFlash" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ReFlash_Click"/>
+            <Button x:Name="AutoSearch" Content="{DynamicResource ResourceKey=AutoSearch}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="AutoSearch_Click"/>
+            <Button x:Name="ReFlash" Content="{DynamicResource ResourceKey=ReFlash}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ReFlash_Click"/>
         </Grid>
 
         <DataGrid x:Name="ItemList" 
@@ -50,10 +54,10 @@
         </DataGrid>
 
         <Grid Grid.Row="2" Margin="0,10,0,0">
-            <Button x:Name="ItemAdd" Content="Add" HorizontalAlignment="Left" VerticalAlignment="Center" Click="ItemAdd_Click"/>
+            <Button x:Name="ItemAdd" Content="{DynamicResource ResourceKey=ItemAdd}" HorizontalAlignment="Left" VerticalAlignment="Center" Click="ItemAdd_Click"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button x:Name="ItemLocation" Content="Location" Margin="0,0,8,0" Click="ItemLocation_Click"/>
-                <Button x:Name="ItemDelete" Content="Delete" Click="ItemDelete_Click"/>
+                <Button x:Name="ItemLocation" Content="{DynamicResource ResourceKey=ItemLocation}" Margin="0,0,8,0" Click="ItemLocation_Click"/>
+                <Button x:Name="ItemDelete" Content="{DynamicResource ResourceKey=ItemDelete}" Click="ItemDelete_Click"/>
             </StackPanel>
         </Grid>
         <Grid/>

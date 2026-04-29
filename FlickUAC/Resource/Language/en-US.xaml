@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="error">Error</sys:String>
+    <sys:String x:Key="ItemAdd">Add</sys:String>
+    <sys:String x:Key="ItemDelete">Delete</sys:String>
+    <sys:String x:Key="ItemLocation">Location</sys:String>
+    <sys:String x:Key="message">Message</sys:String>
+    <sys:String x:Key="noActionTaken">No action taken</sys:String>
+    <sys:String x:Key="ReFlash">Reflash</sys:String>
+    <sys:String x:Key="registryValueAdded">Registry value added</sys:String>
+    <sys:String x:Key="registryValueDeleted">Registry value deleted</sys:String>
+    <sys:String x:Key="theSelectedFilePathIs">The selected file path is:</sys:String>
+    <sys:String x:Key="whetherToDeleteTheValue">Whether to delete the value:</sys:String>
+</ResourceDictionary>
