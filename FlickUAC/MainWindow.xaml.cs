@@ -14,6 +14,10 @@ namespace FlickUAC
 {
     public partial class MainWindow : Window
     {
+        private static readonly string registryPath = @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+        string[] supportedLanguages = { "en-US", "zh-CN", "zh-TW" };
+        string[] autoSeachProcessName = { "GenshinImpact" };
+
         public class UacItem : INotifyPropertyChanged
         {
             public required string ItemPath { get; set; }
@@ -25,16 +29,13 @@ namespace FlickUAC
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
         }
-
         public class LanguageItem
         {
             public required string Code { get; set; }
             public required string NativeName { get; set; }
         }
-
         public ObservableCollection<UacItem> DisplayItems { get; set; } = new();
-        private static readonly string registryPath = @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
-        string[] supportedLanguages = { "zh-TW", "zh-CN", "en-US" };
+        
         public class languageResource
         {
             public static languageResource Current { get; } = new languageResource();
@@ -51,7 +52,65 @@ namespace FlickUAC
                 return System.Windows.Application.Current.TryFindResource(key)?.ToString() ?? $"[{key}]";
             }
         }
+    
+        private void AddItemToRegistry(string selectedFilePath)
+        {
+            MessageBoxResult result = MessageBox.Show(
+                        $"{languageResource.Current.TheSelectedFilePathIs}\n{selectedFilePath}",
+                        languageResource.Current.Message,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
 
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(registryPath))
+                    {
+                        key.SetValue(selectedFilePath, "RunAsInvoker");
+                        MessageBox.Show(
+                            languageResource.Current.RegistryValueAdded,
+                            languageResource.Current.Message,
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show(languageResource.Current.NoActionTaken, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            ReFlashItemPath();
+        }
+   
+        private void ChangeLanguage(string languageCode)
+        {
+            string uriPath = $"/Resource/Language/{languageCode}.xaml";
+            Uri uri = new Uri(uriPath, UriKind.Relative);
+            try
+            {
+                ResourceDictionary newDict = new ResourceDictionary { Source = uri };
+                var mergedDicts = Application.Current.Resources.MergedDictionaries;
+                for (int i = 0; i < mergedDicts.Count; i++)
+                {
+                    if (mergedDicts[i].Source != null && mergedDicts[i].Source.OriginalString.Contains("/Language/"))
+                    {
+                        mergedDicts.RemoveAt(i);
+                        break;
+                    }
+                }
+                mergedDicts.Add(newDict);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Loading language resource failed: {ex.Message}");
+            }
+        }
+ 
         private bool ReFlashItemPath()
         {
             bool hasValue = false;
@@ -102,64 +161,6 @@ namespace FlickUAC
             return hasValue;
         }
 
-        private void ChangeLanguage(string languageCode)
-        {
-            string uriPath = $"/Resource/Language/{languageCode}.xaml";
-            Uri uri = new Uri(uriPath, UriKind.Relative);
-            try
-            {
-                ResourceDictionary newDict = new ResourceDictionary { Source = uri };
-                var mergedDicts = Application.Current.Resources.MergedDictionaries;
-                for (int i = 0; i < mergedDicts.Count; i++)
-                {
-                    if (mergedDicts[i].Source != null && mergedDicts[i].Source.OriginalString.Contains("/Language/"))
-                    {
-                        mergedDicts.RemoveAt(i);
-                        break;
-                    }
-                }
-                mergedDicts.Add(newDict);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Loading language resource failed: {ex.Message}");
-            }
-        }
-
-        private void AddItemToRegistry(string selectedFilePath)
-        {
-            MessageBoxResult result = MessageBox.Show(
-                        $"{languageResource.Current.TheSelectedFilePathIs}\n{selectedFilePath}",
-                        languageResource.Current.Message,
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(registryPath))
-                    {
-                        key.SetValue(selectedFilePath, "RunAsInvoker");
-                        MessageBox.Show(
-                            languageResource.Current.RegistryValueAdded,
-                            languageResource.Current.Message,
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show(languageResource.Current.NoActionTaken, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            ReFlashItemPath();
-        }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -192,17 +193,16 @@ namespace FlickUAC
             ReFlashItemPath();
         }
 
-        private void LanguageMenu_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (LanguageMenu.SelectedValue is string selectedCode)
-            {
-                ChangeLanguage(selectedCode);
-            }
-        }
-
         private void AutoSearch_Click(object sender, RoutedEventArgs e)
         {
-
+            foreach (var processName in autoSeachProcessName)
+            {
+                Process[] processes = Process.GetProcessesByName(processName);
+                foreach (var item in processes)
+                {
+                    AddItemToRegistry(item.MainModule.FileName);
+                }
+            }
         }
 
         private async void ReFlash_Click(object sender, RoutedEventArgs e)
@@ -229,32 +229,6 @@ namespace FlickUAC
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void ItemLocation_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedItems = ItemList.SelectedItems.Cast<UacItem>().ToList();
-            foreach (var item in selectedItems)
-            {
-
-                if (System.IO.File.Exists(item.ItemPath))
-                {
-                    Process.Start("explorer.exe", $"/select,\"{item.ItemPath}\"");
-                }
-                else
-                {
-                    string? directory = item.ItemPath;
-                    do
-                    {
-                        if (Directory.Exists(directory))
-                        {
-                            Process.Start("explorer.exe", $"\"{directory}\"");
-                            break;
-                        }
-                        directory = System.IO.Path.GetDirectoryName(directory);
-                    } while (!System.IO.File.Exists(directory));
-                }
             }
         }
 
@@ -291,6 +265,40 @@ namespace FlickUAC
             int selectedCount = ItemList.SelectedItems.Count;
             ItemDelete.IsEnabled = selectedCount > 0;
             ItemLocation.IsEnabled = selectedCount > 0;
+        }
+
+        private void ItemLocation_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItems = ItemList.SelectedItems.Cast<UacItem>().ToList();
+            foreach (var item in selectedItems)
+            {
+
+                if (System.IO.File.Exists(item.ItemPath))
+                {
+                    Process.Start("explorer.exe", $"/select,\"{item.ItemPath}\"");
+                }
+                else
+                {
+                    string? directory = item.ItemPath;
+                    do
+                    {
+                        if (Directory.Exists(directory))
+                        {
+                            Process.Start("explorer.exe", $"\"{directory}\"");
+                            break;
+                        }
+                        directory = System.IO.Path.GetDirectoryName(directory);
+                    } while (!System.IO.File.Exists(directory));
+                }
+            }
+        }
+
+        private void LanguageMenu_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LanguageMenu.SelectedValue is string selectedCode)
+            {
+                ChangeLanguage(selectedCode);
+            }
         }
 
         private async void Window_DragOver(object sender, DragEventArgs e)

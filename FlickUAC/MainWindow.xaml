@@ -17,9 +17,11 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,10">
-            <ComboBox x:Name="LanguageMenu" HorizontalAlignment="Left" Width="120" VerticalAlignment="Center" SelectionChanged="LanguageMenu_SelectionChanged"/>
-            <Button x:Name="AutoSearch" Content="{DynamicResource ResourceKey=AutoSearch}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="AutoSearch_Click"/>
-            <Button x:Name="ReFlash" Content="{DynamicResource ResourceKey=ReFlash}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ReFlash_Click"/>
+            <ComboBox x:Name="LanguageMenu" HorizontalAlignment="Left" Width="130" VerticalAlignment="Center" SelectionChanged="LanguageMenu_SelectionChanged"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="AutoSearch" Content="{DynamicResource ResourceKey=AutoSearch}" HorizontalAlignment="Center" Margin="0,0,8,0" Click="AutoSearch_Click"/>
+                <Button x:Name="ReFlash" Content="{DynamicResource ResourceKey=ReFlash}" HorizontalAlignment="Right" Click="ReFlash_Click"/>
+            </StackPanel>
         </Grid>
 
         <DataGrid x:Name="ItemList" 

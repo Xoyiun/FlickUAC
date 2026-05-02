@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <sys:String x:Key="AutoSearch">自动搜索</sys:String>
     <sys:String x:Key="error">错误</sys:String>
     <sys:String x:Key="ItemAdd">添加</sys:String>
     <sys:String x:Key="ItemDelete">删除</sys:String>

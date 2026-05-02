@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-
+    
+    <sys:String x:Key="AutoSearch">自動搜尋</sys:String>
     <sys:String x:Key="error">錯誤</sys:String>
     <sys:String x:Key="ItemAdd">新增</sys:String>
     <sys:String x:Key="ItemDelete">刪除</sys:String>
