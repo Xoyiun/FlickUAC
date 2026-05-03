@@ -19,7 +19,12 @@
         <Grid Grid.Row="0" Margin="0,0,0,10">
             <ComboBox x:Name="LanguageMenu" HorizontalAlignment="Left" Width="130" VerticalAlignment="Center" SelectionChanged="LanguageMenu_SelectionChanged"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+<<<<<<< HEAD
                 <Button x:Name="AutoSearch" Content="{DynamicResource ResourceKey=AutoSearch}" HorizontalAlignment="Center" Click="AutoSearch_Click"/>
+=======
+                <Button x:Name="AutoSearch" Content="{DynamicResource ResourceKey=AutoSearch}" HorizontalAlignment="Center" Margin="0,0,8,0" Click="AutoSearch_Click"/>
+                <Button x:Name="ReFlash" Content="{DynamicResource ResourceKey=ReFlash}" HorizontalAlignment="Right" Click="ReFlash_Click"/>
+>>>>>>> e979d5bdbb5768099359f07a4c74463f60e2adc6
             </StackPanel>
         </Grid>
 
