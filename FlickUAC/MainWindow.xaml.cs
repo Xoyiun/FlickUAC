@@ -20,7 +20,6 @@ namespace FlickUAC
     {
         private static readonly string registryPath = @"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
         string[] supportedLanguages = { "en-US", "zh-CN", "zh-TW" };
-<<<<<<< HEAD
         string[] autoSeachProcessName = {
         "Endfield",      // 明日方舟：終末地
         "GenshinImpact", // 原神
@@ -43,9 +42,6 @@ namespace FlickUAC
         [return: MarshalAs(UnmanagedType.Bool)]
 
         private static extern bool CloseHandle(IntPtr hObject);
-=======
-        string[] autoSeachProcessName = { "GenshinImpact" };
->>>>>>> e979d5bdbb5768099359f07a4c74463f60e2adc6
 
         public class UacItem : INotifyPropertyChanged
         {
@@ -90,8 +86,6 @@ namespace FlickUAC
                         languageResource.Current.Message,
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Question);
-<<<<<<< HEAD
-
             if (result == MessageBoxResult.Yes)
             {
                 try
@@ -162,58 +156,6 @@ namespace FlickUAC
                 }
             }
             return null;
-        }
-=======
->>>>>>> e979d5bdbb5768099359f07a4c74463f60e2adc6
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(registryPath))
-                    {
-                        key.SetValue(selectedFilePath, "RunAsInvoker");
-                        MessageBox.Show(
-                            languageResource.Current.RegistryValueAdded,
-                            languageResource.Current.Message,
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, languageResource.Current.Error, MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show(languageResource.Current.NoActionTaken, languageResource.Current.Message, MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            ReFlashItemPath();
-        }
-   
-        private void ChangeLanguage(string languageCode)
-        {
-            string uriPath = $"/Resource/Language/{languageCode}.xaml";
-            Uri uri = new Uri(uriPath, UriKind.Relative);
-            try
-            {
-                ResourceDictionary newDict = new ResourceDictionary { Source = uri };
-                var mergedDicts = Application.Current.Resources.MergedDictionaries;
-                for (int i = 0; i < mergedDicts.Count; i++)
-                {
-                    if (mergedDicts[i].Source != null && mergedDicts[i].Source.OriginalString.Contains("/Language/"))
-                    {
-                        mergedDicts.RemoveAt(i);
-                        break;
-                    }
-                }
-                mergedDicts.Add(newDict);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Loading language resource failed: {ex.Message}");
-            }
         }
  
         private bool ReFlashItemPath()
@@ -300,8 +242,7 @@ namespace FlickUAC
 
         private void AutoSearch_Click(object sender, RoutedEventArgs e)
         {
-<<<<<<< HEAD
-            if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+    if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
                 try
                 {
@@ -326,17 +267,6 @@ namespace FlickUAC
                 foreach (var processName in autoSeachProcessName)
                 {
                     Process[] processes = Process.GetProcessesByName(processName);
-=======
-            foreach (var processName in autoSeachProcessName)
-            {
-                Process[] processes = Process.GetProcessesByName(processName);
-                foreach (var item in processes)
-                {
-                    AddItemToRegistry(item.MainModule.FileName);
-                }
-            }
-        }
->>>>>>> e979d5bdbb5768099359f07a4c74463f60e2adc6
 
                     foreach (var item in processes)
                     {
