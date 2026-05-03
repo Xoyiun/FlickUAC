@@ -24,14 +24,14 @@
   </tr>
   <tr>
     <td>
-       <p align="center">
-       <img src="https://github.com/user-attachments/assets/25c42eab-ec19-4599-83a0-df780a7c9d58" width="30%" title="开启应用前" />
-       <img src="https://github.com/user-attachments/assets/5e316e8f-d6ae-456e-979a-48a35a327794" width="30%" title="UAC" />
-       <img src="https://github.com/user-attachments/assets/f91a81d2-4828-407a-bf8c-7bf7c34e7fd5" width="30%" title="开启应用后" />
+        <p align="center">
+        <img src="https://github.com/user-attachments/assets/25c42eab-ec19-4599-83a0-df780a7c9d58" width="30%" title="开启应用前" />
+        <img src="https://github.com/user-attachments/assets/5e316e8f-d6ae-456e-979a-48a35a327794" width="30%" title="UAC" />
+        <img src="https://github.com/user-attachments/assets/f91a81d2-4828-407a-bf8c-7bf7c34e7fd5" width="30%" title="开启应用后" />
 </p></td>
     <td><p align="center">
-       <img src="https://github.com/user-attachments/assets/25c42eab-ec19-4599-83a0-df780a7c9d58" width="42%" title="开启应用前" />
-       <img src="https://github.com/user-attachments/assets/f91a81d2-4828-407a-bf8c-7bf7c34e7fd5" width="42%" title="开启应用后" />
+        <img src="https://github.com/user-attachments/assets/25c42eab-ec19-4599-83a0-df780a7c9d58" width="42%" title="开启应用前" />
+        <img src="https://github.com/user-attachments/assets/f91a81d2-4828-407a-bf8c-7bf7c34e7fd5" width="42%" title="开启应用后" />
 </p></td>
   </tr>
   <tr>
@@ -50,23 +50,32 @@
 * **作用**：手动建立新的 UAC 绕过注册表项。
 * **用法**：点击“加入”按钮，在弹出的对话框中选取欲执行之 `.exe` 文件或输入特定指令路径。确认后程序将在对应的注册表路径下建立对应的注册表值。
 
-### 2. 批量删除
+### 2. 自动搜索
+* **作用**：自动搜索能加入 UAC 绕过的方法。
+* **目前支持**：
+  * 明日方舟：终末地
+  * 原神
+  * 崩坏：星穹铁道
+  * 绝区零
+  * 鸣潮
+  * 无限大
+  * 崩坏 3rd
+  * 永劫无间
+* **用法**：点击“自动搜索”按钮，授予管理员权限，确认文件是否与支持列表中的一致，确认后执行添加。
+
+### 3. 批量删除
 * **作用**：从系统注册表中移除选定项目的绕过设定。
 * **用法**：在清单中选取一个或多个项目后点击“删除”。程序将调用注册表 API 执行删除作业，并同步将其从 UI 清单中移除。
 
-### 3. 批量查看详细内容
+### 4. 批量查看详细内容
 * **作用**：检视选定项目的详细路径、图标信息以及定位实体文件。
 * **用法**：
-    * **內容預覽**：鼠标停留在项目上会显示完整路径。
-    * **檔案定位**：选取项目后点击“位置”，程序将调用文件资源管理器，自动打开文件夹并选中该实体文件。
+    * **内容预览**：鼠标停留在项目上会显示完整路径。
+    * **文件定位**：选取项目后点击“位置”，程序将调用文件资源管理器，自动打开文件夹并选中该实体文件。
 
-### 4. 语言切换
+### 5. 语言切换
 * **作用**：切换界面显示语言。
-* **用法**：点击语言切换按钮。程序将即时从 JSON 语系文件重新映射界面字符串，实现 Runtime 状态下的界面语系更换，无需重新启动程序。
-
-### 5. 重新整理
-* **作用**：重新扫描注册表并同步最新的数据状态。
-* **用法**：点击“重新整理”按钮。程序会重新遍历目标注册表路径并重新加载数据，确保 UI 显示与系统实际状态完全一致。
+* **用法**：点击语言切换按钮。程序将即时从 JSON 语言包文件重新映射界面字符串，实现 Runtime 状态下的界面语言更换，无需重新启动程序。
 
 ---
 
@@ -90,4 +99,4 @@
 ## 操作安全性提示
 本工具涉及对系统注册表 `HKEY_CURRENT_USER` 路径的写入与删除操作。在执行“批量删除”或“加入项目”前，请务必确认操作目标符合您的预期。
 
-# 一切歧异以繁体中文为准
+# 一切差异以繁体中文为准
