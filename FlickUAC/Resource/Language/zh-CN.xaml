@@ -9,7 +9,7 @@
     <sys:String x:Key="ItemLocation">位置</sys:String>
     <sys:String x:Key="message">信息</sys:String>
     <sys:String x:Key="noActionTaken">未执行任何动作</sys:String>
-    <sys:String x:Key="ReFlash">刷新</sys:String>
+    <sys:String x:Key="thisFeatureRequiresAdministratorPrivileges">此功能需要管理员权限</sys:String>
     <sys:String x:Key="registryValueAdded">注册表值已新增</sys:String>
     <sys:String x:Key="registryValueDeleted">注册表值已删除</sys:String>
     <sys:String x:Key="theSelectedFilePathIs">选择的档案路径是：</sys:String>

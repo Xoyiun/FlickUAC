@@ -9,7 +9,7 @@
     <sys:String x:Key="ItemLocation">Location</sys:String>
     <sys:String x:Key="message">Message</sys:String>
     <sys:String x:Key="noActionTaken">No action taken</sys:String>
-    <sys:String x:Key="ReFlash">Reflash</sys:String>
+    <sys:String x:Key="thisFeatureRequiresAdministratorPrivileges">This feature requires administrator privileges</sys:String> 
     <sys:String x:Key="registryValueAdded">Registry value added</sys:String>
     <sys:String x:Key="registryValueDeleted">Registry value deleted</sys:String>
     <sys:String x:Key="theSelectedFilePathIs">The selected file path is:</sys:String>
